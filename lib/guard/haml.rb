@@ -1,4 +1,5 @@
 require 'haml'
+require 'slim'
 
 require 'guard/compat/plugin'
 
@@ -11,7 +12,7 @@ module Guard
 
       opts = {
         notifications:        true,
-        default_ext:          'html',
+        default_ext:          'wxml',
         auto_append_file_ext: false,
         helper_modules:       []
       }.merge(opts)
@@ -58,7 +59,8 @@ module Guard
       content = File.new(file).read
       template_options = options[:haml_options] ? options[:haml_options].dup : {}
       template_options[:filename] = file
-      engine  = ::Haml::Engine.new(content, template_options)
+      # engine  = ::Haml::Engine.new(content, template_options)
+      engine  = ::Slim::Template.new(file, template_options)
       engine.render scope_object
     rescue StandardError => error
       message = "HAML compilation of #{file} failed!\nError: #{error.message}"
@@ -116,7 +118,7 @@ module Guard
       sub_strings           = File.basename(file).split('.')
       base_name, extensions = sub_strings.first, sub_strings[1..-1]
 
-      if extensions.last == 'haml'
+      if extensions.last == 'slim'
         extensions.pop
         if extensions.empty?
           [base_name, options[:default_ext]].join('.')
